@@ -18,6 +18,13 @@
   font-size: calc(10px + 2vmin);
   color: white;
 }
+.dot {
+  border-radius: 50%;
+}
+
+.dot:hover {
+  border: 3px solid green;
+}
 
 .App-link {
   color: #61dafb;
