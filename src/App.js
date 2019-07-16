@@ -7,12 +7,13 @@ export default class App extends React.Component {
         super(props);
         this.state = {
             audio: [
-                {
-                    cluster: 1,
-                    coord: [0.1, 0.2],
-                    blob: {},
-                    color: '',
-                },
+                // {
+                //     src: '',
+                //     blob: {},
+                //     coord: [0.1, 0.2],
+                //     color: '',
+                //     cluster: 1,
+                // },
             ], //
         }
     }
@@ -33,10 +34,19 @@ export default class App extends React.Component {
     uploadAll() {
 
     }
+    getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
     render() {
         const {audio} = this.state;
         return (
             <div className="App">
+                <div className="title">Sound Cloud</div>
                 <header className="App-header">
                     {
                         audio.map((item, index) => {
@@ -48,27 +58,43 @@ export default class App extends React.Component {
                                         el.load();
                                         el.play();
                                     }}
-                                    style={{width: '20px', height:'20px', backgroundColor: 'yellow', marginTop:'5px',}}
+                                    style={{
+                                        marginTop:'5px',
+                                        width: '20px',
+                                        height:'20px',
+                                        backgroundColor: `rgb(${item.coord[0]*255}, ${item.coord[1]*255}, 125)`,
+                                        left: item.coord[0]*100+'%',
+                                        top: item.coord[1]*100+'%',
+                                    }}
                                 >
                                     <audio
-                                        src={item}
+                                        src={item.src}
                                         id={'audio'+index}/>
                                 </div>
                             )
                         })
                     }
+                </header>
+                <div className="button-wrap">
                     <button onClick={()=>{this.startRecording();}}
                             type="success" size="small"
                     >开始录音</button>
                     <button onClick={()=>{
-                        // const blob = this.recorder.getBlob();
+                        const blob = this.recorder.getBlob();
                         // console.log(blob);//todo
                         this.setState({
-                            audio: [...this.state.audio, window.URL.createObjectURL(this.recorder.getBlob())]
+                            audio: [...this.state.audio,
+                                {
+                                    src: window.URL.createObjectURL(this.recorder.getBlob()),
+                                    blob: blob,
+                                    coord: [Math.random(), Math.random()],
+                                    color: this.getRandomColor(),
+                                },
+                            ]
                         })
                     }} type="danger" size="small">结束录音并添加</button>
                     <button onClick={()=>{}}>全部上传</button>
-                </header>
+                </div>
             </div>
         )
     }

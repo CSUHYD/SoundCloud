@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  background-color: #282c34;
 }
 
 .App-logo {
@@ -8,9 +9,19 @@
   pointer-events: none;
 }
 
+.title {
+  height: 10vh;
+  line-height: 10vh;
+  font-size: 30px;
+  font-weight: bold;
+  font-family: fantasy, monospace, cursive;
+  color: #fff;
+}
+
 .App-header {
+  position: relative;
   background-color: #282c34;
-  min-height: 100vh;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,10 +31,11 @@
 }
 .dot {
   border-radius: 50%;
+  position: absolute;
 }
 
 .dot:hover {
-  border: 3px solid green;
+  border: 2px solid white;
 }
 
 .App-link {
@@ -37,4 +49,12 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.button-wrap {
+  height: 10vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #282c34;
 }
