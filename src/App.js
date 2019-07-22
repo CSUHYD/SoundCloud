@@ -46,9 +46,11 @@ export default class App extends React.Component {
             if (res && res.data) {
                 console.log(res.data);//todo
                 Object.keys(res.data).forEach((key) => {
-                    arr[key].cluster = res.data[key].cluster;
-                    arr[key].coord = res.data[key].coord;
-                })
+                    if (arr[key]) {
+                        arr[key].cluster = res.data[key].cluster;
+                        arr[key].coord = res.data[key].coord;
+                    }
+                });
                 this.setState({
                     audio: arr,
                 })
