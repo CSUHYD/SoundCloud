@@ -2,17 +2,38 @@
   text-align: center;
   background-color: #282c34;
 }
-
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 40vmin;
   pointer-events: none;
 }
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.blink {
+  animation: blinking infinite 1.5s linear;
+}
+@keyframes blinking {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  0% {
+    opacity: 1;
+  }
+}
 
 .title {
   height: 10vh;
-  line-height: 10vh;
-  font-size: 30px;
+  line-height: 15vh;
+  font-size: 50px;
   font-weight: bold;
   font-family: fantasy, monospace, cursive;
   color: #fff;
@@ -41,6 +62,14 @@
   width: 20px;
   height: 20px;
 }
+.recording-dot {
+  width: 15px;
+  height: 15px;
+  background-color: red;
+  display: inline-block;
+  border-radius: 50%;
+  margin-right: 10px;
+}
 
 .dot:hover {
   border: 1px solid white;
@@ -48,15 +77,6 @@
 
 .App-link {
   color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 .button-wrap {
@@ -76,4 +96,7 @@
   font-weight: bold;
   font-size: 20px;
   cursor: pointer;
+}
+.submit {
+  margin-left: 80px;
 }

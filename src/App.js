@@ -66,7 +66,7 @@ export default class App extends React.Component {
         return color;
     }
     render() {
-        const {audio, editing, } = this.state;
+        const {audio, editing, recording,} = this.state;
         return (
             <div className="App">
                 <div className="title">Sound Cloud</div>
@@ -99,8 +99,9 @@ export default class App extends React.Component {
                 <div className="button-wrap">
                     <button onClick={()=>{this.startRecording();}}
                             type="success" size="small"
-                    >开始录音</button>
+                    ><span className={`recording-dot${recording ? ' blink' : ''}`}/>开始录音</button>
                     <button onClick={()=>{
+                        if (!this.recorder) return;
                         const blob = this.recorder.getBlob();
                         // console.log(blob);//todo
                         this.setState({
@@ -115,10 +116,13 @@ export default class App extends React.Component {
                             recording: false,
                             editing: true,
                         })
-                    }} type="danger" size="small">结束录音并添加</button>
-                    <button onClick={()=>{
-                        this.uploadAll();
-                    }}>开始分类</button>
+                    }} type="danger" size="small">结束录音</button>
+                    <button
+                        className="submit"
+                        onClick={()=>{
+                            this.uploadAll();
+                        }}
+                    >开始分类</button>
                 </div>
             </div>
         )
