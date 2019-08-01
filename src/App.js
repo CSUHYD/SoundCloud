@@ -18,21 +18,20 @@ export default class App extends React.Component {
                 //     cluster: 1,
                 // },
             ], //
+            recording: false,
+            editing: true,
         }
     }
     componentDidMount() {
-    }
-    init() {
-
     }
     startRecording() {
         window.HZRecorder.get((rec) => {
             this.recorder = rec;
             this.recorder.start();
         });
-    }
-    stopRecording() {
-        this.recorder.stopAndUpload();
+        this.setState({
+            recording: true,
+        })
     }
     uploadAll() {
         const {audio} = this.state;
@@ -53,6 +52,7 @@ export default class App extends React.Component {
                 });
                 this.setState({
                     audio: arr,
+                    editing: false,
                 })
             }
         });
@@ -66,7 +66,7 @@ export default class App extends React.Component {
         return color;
     }
     render() {
-        const {audio} = this.state;
+        const {audio, editing, } = this.state;
         return (
             <div className="App">
                 <div className="title">Sound Cloud</div>
@@ -75,16 +75,13 @@ export default class App extends React.Component {
                         audio.map((item, index) => {
                             return (
                                 <div
-                                    className="dot"
+                                    className={`dot${(editing && index == audio.length - 1) ? ' dot-curr' : ''}`}
                                     onMouseOver={()=>{
                                         const el = document.getElementById('audio'+index);
                                         el.load();
                                         el.play();
                                     }}
                                     style={{
-                                        marginTop:'5px',
-                                        width: '20px',
-                                        height:'20px',
                                         // if cluster exist, pick color[cluster]
                                         backgroundColor: `rgb(${item.coord[0]*255}, ${item.coord[1]*255}, 125)`,
                                         left: item.coord[0]*100+'%',
@@ -114,12 +111,14 @@ export default class App extends React.Component {
                                     coord: [Math.random(), Math.random()],
                                     color: this.getRandomColor(),
                                 },
-                            ]
+                            ],
+                            recording: false,
+                            editing: true,
                         })
                     }} type="danger" size="small">结束录音并添加</button>
                     <button onClick={()=>{
                         this.uploadAll();
-                    }}>全部上传</button>
+                    }}>开始分类</button>
                 </div>
             </div>
         )

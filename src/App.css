@@ -28,14 +28,22 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  margin: 0 40px 0 20px;
 }
 .dot {
   border-radius: 50%;
   position: absolute;
+  width: 10px;
+  height: 10px;
+}
+
+.dot.dot-curr {
+  width: 20px;
+  height: 20px;
 }
 
 .dot:hover {
-  border: 2px solid white;
+  border: 1px solid white;
 }
 
 .App-link {
@@ -57,4 +65,15 @@
   justify-content: center;
   align-items: center;
   background-color: #282c34;
+}
+
+.button-wrap button {
+  height: 40px;
+  border-radius: 4px;
+  background-color: #282c34;
+  color: #fff;
+  margin-right: 20px;
+  font-weight: bold;
+  font-size: 20px;
+  cursor: pointer;
 }
