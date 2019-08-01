@@ -54,13 +54,36 @@
 .dot {
   border-radius: 50%;
   position: absolute;
+  width: 14px;
+  height: 14px;
+  background-color: #282c34;
+  /*background-color: black;*/
+}
+.dot-inner {
+  border-radius: 50%;
+  position: relative;
   width: 10px;
   height: 10px;
+  left: 2px;
+  top: 2px;
 }
 
-.dot.dot-curr {
+.dot-curr .dot-inner {
   width: 20px;
   height: 20px;
+}
+.dot.dot-curr {
+  width: 24px;
+  height: 24px;
+  border: 1px solid white;
+}
+.dot:hover {
+  border: 1px solid white;
+  z-index: 10;
+}
+.dot-curr:hover {
+  border: 2px solid white;
+  z-index: 10;
 }
 .recording-dot {
   width: 15px;
@@ -70,11 +93,6 @@
   border-radius: 50%;
   margin-right: 10px;
 }
-
-.dot:hover {
-  border: 1px solid white;
-}
-
 .App-link {
   color: #61dafb;
 }

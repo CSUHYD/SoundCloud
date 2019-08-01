@@ -83,14 +83,20 @@ export default class App extends React.Component {
                                     }}
                                     style={{
                                         // if cluster exist, pick color[cluster]
-                                        backgroundColor: `rgb(${item.coord[0]*255}, ${item.coord[1]*255}, 125)`,
                                         left: item.coord[0]*100+'%',
                                         top: item.coord[1]*100+'%',
                                     }}
                                 >
                                     <audio
                                         src={item.src}
-                                        id={'audio'+index}/>
+                                        id={'audio'+index}
+                                    />
+                                    <div className="dot-inner"
+                                         style={{
+                                             // if cluster exist, pick color[cluster]
+                                             backgroundColor: `rgb(${item.coord[0]*255}, ${item.coord[1]*255}, 125)`,
+                                         }}
+                                    />
                                 </div>
                             )
                         })
