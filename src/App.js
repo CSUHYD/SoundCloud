@@ -76,11 +76,6 @@ export default class App extends React.Component {
                             return (
                                 <div
                                     className={`dot${(editing && index == audio.length - 1) ? ' dot-curr' : ''}`}
-                                    onMouseOver={()=>{
-                                        const el = document.getElementById('audio'+index);
-                                        el.load();
-                                        el.play();
-                                    }}
                                     style={{
                                         // if cluster exist, pick color[cluster]
                                         left: item.coord[0]*100+'%',
@@ -91,11 +86,17 @@ export default class App extends React.Component {
                                         src={item.src}
                                         id={'audio'+index}
                                     />
-                                    <div className="dot-inner"
-                                         style={{
-                                             // if cluster exist, pick color[cluster]
-                                             backgroundColor: `rgb(${item.coord[0]*255}, ${item.coord[1]*255}, 125)`,
-                                         }}
+                                    <div
+                                        className="dot-inner"
+                                        onMouseOver={()=>{
+                                            const el = document.getElementById('audio'+index);
+                                            el.load();
+                                            el.play();
+                                        }}
+                                        style={{
+                                            // if cluster exist, pick color[cluster]
+                                            backgroundColor: `rgb(${item.coord[0]*255}, ${item.coord[1]*255}, 125)`,
+                                        }}
                                     />
                                 </div>
                             )
