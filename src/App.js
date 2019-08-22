@@ -41,9 +41,9 @@ export default class App extends React.Component {
             fd.append(`${i}`, audio[i].blob);
         }
         const arr = JSON.parse(JSON.stringify(this.state.audio));
-        // axios.post('http://localhost:4000/api/speech', fd).then((res) => { //todo robizlab.com
-        // axios.post('http://47.99.141.253:4000/api/speech', fd).then((res) => { //todo robizlab.com
-        axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
+        axios.post('http://localhost:4000/sort', fd).then((res) => { //todo robizlab.com
+        // axios.post('http://47.99.141.253:4000/sort', fd).then((res) => { //todo robizlab.com
+        // axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
             if (res && res.data) {
                 console.log(res.data);//todo
                 Object.keys(res.data).forEach((key) => {
