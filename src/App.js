@@ -41,7 +41,8 @@ export default class App extends React.Component {
             fd.append(`${i}`, audio[i].blob);
         }
         const arr = JSON.parse(JSON.stringify(this.state.audio));
-        axios.post('http://localhost:4000/sort', fd).then((res) => { //todo robizlab.com
+        const url = window.uploadUrl || 'localhost:4000/sort';
+        axios.post(url, fd).then((res) => { //todo robizlab.com
         // axios.post('http://47.99.141.253:4000/sort', fd).then((res) => { //todo robizlab.com
         // axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
             if (res && res.data) {
