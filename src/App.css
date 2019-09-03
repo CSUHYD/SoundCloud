@@ -120,3 +120,27 @@
 .submit {
   margin-left: 80px;
 }
+
+.track-wrap {
+  display: flex;
+  justify-content: space-around
+}
+.track-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px
+}
+.track-dot {
+  border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  margin-right: 20px
+}
+.track-dot.on {
+  width: 10px;
+  height: 10px;
+}
+.track-dot.playing {
+  width: 15px;
+  height: 15px;
+}

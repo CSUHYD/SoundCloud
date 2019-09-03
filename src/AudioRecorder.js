@@ -99,15 +99,15 @@ import axios from 'axios';
                 data.setUint32(offset, dataLength, true); offset += 4;
                 // 写入采样数据 
                 if (sampleBits === 8) {
-                    for (var i = 0; i < bytes.length; i++, offset++) {
-                        var s = Math.max(-1, Math.min(1, bytes[i]));
+                    for (let i = 0; i < bytes.length; i++, offset++) {
+                        let s = Math.max(-1, Math.min(1, bytes[i]));
                         var val = s < 0 ? s * 0x8000 : s * 0x7FFF;
                         val = parseInt(255 / (65535 / (val + 32768)));
                         data.setInt8(offset, val, true);
                     }
                 } else {
-                    for (var i = 0; i < bytes.length; i++, offset += 2) {
-                        var s = Math.max(-1, Math.min(1, bytes[i]));
+                    for (let i = 0; i < bytes.length; i++, offset += 2) {
+                        let s = Math.max(-1, Math.min(1, bytes[i]));
                         data.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
                     }
                 }
