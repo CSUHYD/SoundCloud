@@ -4,10 +4,10 @@ import "./AudioRecorder";
 import axios from "axios/index";
 
 // const CLUSTER_COLORS = [];
-const track0Default = [1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0];
-const track1Default = [0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1];
-const track2Default = [0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1];
-const track3Default = [0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0];
+const track0Default = [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1];
+const track1Default = [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0];
+const track2Default = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
+const track3Default = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
 const TEMPO = [100, 150, 200, 250, 300, 400, 500, 600, 800, 1000];
 export default class App extends React.Component {
     constructor(props) {
@@ -28,29 +28,33 @@ export default class App extends React.Component {
             track1: track1Default,
             track2: track2Default,
             track3: track3Default,
-            track0Audio: {
-                // el,
-                // color,
-            },
+            track0Audio: {},
             track1Audio: {},
             track2Audio: {},
             track3Audio: {},
-            pos: 0, // 0-15,
             interval: "",
-            playing: false
+            playing: false,
+            pos: 0, // 0-15,
+            selectors: [0,0,2,3],
         };
-        this.currTempo = 6; // %11
+        this.pos = 0;
+        this.currTempo = 4; // %11
     }
     componentDidMount() {}
     playTracks() {
-        let n = 0;
+        this.pos = 0;
         const interval = setInterval(() => {
-            const pos = n%16;
-            this.loadAndPlay(0, this.state.track0[pos]);
-            this.loadAndPlay(1, this.state.track1[pos]);
-            this.loadAndPlay(2, this.state.track2[pos]);
-            this.loadAndPlay(3, this.state.track3[pos]);
-            n++;
+            this.loadAndPlay(0, this.state.track0[this.pos]);
+            this.loadAndPlay(1, this.state.track1[this.pos]);
+            this.loadAndPlay(2, this.state.track2[this.pos]);
+            this.loadAndPlay(3, this.state.track3[this.pos]);
+            this.pos++;
+            if (this.pos > 15) {
+                this.pos = 0;
+            }
+            this.setState({
+                pos: this.pos,
+            })
         }, TEMPO[this.currTempo % TEMPO.length]);
         this.setState({
             interval,
@@ -62,10 +66,14 @@ export default class App extends React.Component {
         this.setState({
             playing: false
         });
+        this.loadAndPlay(0, false);
+        this.loadAndPlay(1, false);
+        this.loadAndPlay(2, false);
+        this.loadAndPlay(3, false);
     }
     loadAndPlay(i, on) {
         const a = this.state[`track${i}Audio`];
-        if (a.el) {
+        if (a && a.el) {
             a.el.load();
             if (on) {
                 a.el.play();
@@ -84,7 +92,6 @@ export default class App extends React.Component {
     stopRecording() {
         if (!this.recorder) return;
         const blob = this.recorder.getBlob();
-        // console.log(blob);//todo
         this.setState({
             audio: [
                 ...this.state.audio,
@@ -102,7 +109,6 @@ export default class App extends React.Component {
     tempoClick() {
         this.stopPlaying();
         this.currTempo++;
-        console.log(this.currTempo);
         this.playTracks();
     }
     uploadAndPlayAll() {
@@ -147,6 +153,7 @@ export default class App extends React.Component {
                 <div className="title">Sound Cloud</div>
                 <header className="App-header">
                     {audio.map((item, index) => {
+                        const color = `rgb(${item.coord[0] * 255}, ${item.coord[1] * 255}, 125)`;
                         return (
                             <div
                                 className={`dot${
@@ -157,7 +164,7 @@ export default class App extends React.Component {
                                 style={{
                                     // if cluster exist, pick color[cluster]
                                     left: item.coord[0] * 100 + "%",
-                                    top: item.coord[1] * 100 + "%"
+                                    top: item.coord[1] * 100 + "%",
                                 }}
                             >
                                 <audio src={item.src} id={"audio" + index} />
@@ -165,17 +172,21 @@ export default class App extends React.Component {
                                     className="dot-inner"
                                     onMouseOver={() => {
                                         const el = document.getElementById(
-                                            "audio" + index
+                                            "audio" + index,
                                         );
                                         el.load();
                                         el.play();
                                     }}
                                     style={{
                                         // if cluster exist, pick color[cluster]
-                                        backgroundColor: `rgb(${item.coord[0] *
-                                            255}, ${item.coord[1] * 255}, 125)`
+                                        backgroundColor: color,
                                     }}
                                 />
+                                {this.state.selectors.map((wchaud, wchsel) => {
+                                    if (wchaud === index) {
+                                        return <div className='selector' style={{borderColor: color}}/>
+                                    }
+                                },)}
                             </div>
                         );
                     })}
@@ -210,32 +221,24 @@ export default class App extends React.Component {
                             this.uploadAndPlayAll();
                         }}
                     >
-                        开始分类
+                        分类
                     </button>
                     <button
                         className="submit"
                         onClick={() => {
-                            this.setState({
-                                track0Audio: {
-                                    el: document.getElementById('audio0'),
-                                    color: this.state.audio[0].color,
-                                },
-                                track1Audio: {
-                                    el: document.getElementById('audio1'),
-                                    color: this.state.audio[1].color,
-                                },
-                                track2Audio: {
-                                    el: document.getElementById('audio2'),
-                                    color: this.state.audio[2].color,
-                                },
-                                track3Audio: {
-                                    el: document.getElementById('audio3'),
-                                    color: this.state.audio[3].color,
-                                },
-                            })
+                            for(let i =0; i <4;i++){
+                                if (this.state.audio[i]) {
+                                    this.setState({
+                                        [`track${i}Audio`]: {
+                                            el: document.getElementById(`audio${i}`),
+                                            color: this.state.audio[i].color,
+                                        },
+                                    })
+                                }
+                            }
                         }}
                     >
-                        LoadAudio
+                        载入音轨
                     </button>
                 </div>
                 <div className="track-wrap">
@@ -246,26 +249,53 @@ export default class App extends React.Component {
                                 this.playTracks();
                             }
                         }}>
-                        <button>{this.state.playing ? "Stop" : "Play"}</button>
+                        <button>{this.state.playing ? "停止" : "播放"}</button>
                     </div>
                     <div className="track">
                         {[0, 1, 2, 3].map((item, rowi) => {
+                            const row = this.state[`track${rowi}`];
+                            const rowAudio = this.state[`track${rowi}Audio`];
                             return (
                                 <div className={`track${rowi} track-row`}>
-                                    {this.state[`track${rowi}`].map(
+                                    {row.map(
                                         (colitem, coli) => {
                                             return (
                                                 <div
-                                                    className={`track-dot${
-                                                        colitem ? " on" : ""
-                                                    }`}
-                                                    style={{
-                                                        backgroundColor:
-                                                            this.state[
-                                                                `track${rowi}Audio`
-                                                            ].color || "#fff"
+                                                    className="track-dot-box"
+                                                    onClick={() => {
+                                                        const obj = {};
+                                                        const newrow = [...row];
+                                                        newrow[coli] =
+                                                            colitem === 0
+                                                                ? 1
+                                                                : 0; //toggle
+                                                        obj[
+                                                            `track${rowi}`
+                                                        ] = newrow;
+                                                        this.setState(obj);
                                                     }}
-                                                />
+                                                >
+                                                    <div
+                                                        className={`track-dot${
+                                                            colitem ? " on" : ""
+                                                        }${
+                                                            rowAudio.el &&
+                                                            this.state.pos ===
+                                                                coli &&
+                                                            colitem === 1 &&
+                                                            this.state.playing
+                                                                ? " playing"
+                                                                : ""
+                                                        }`}
+                                                        style={{
+                                                            backgroundColor:
+                                                                this.state[
+                                                                    `track${rowi}Audio`
+                                                                ].color ||
+                                                                "#fff",
+                                                        }}
+                                                    />
+                                                </div>
                                             );
                                         }
                                     )}
@@ -274,10 +304,10 @@ export default class App extends React.Component {
                         })}
                     </div>
                     <div className="random">
-                        <button>Random</button>
+                        <button>随机</button>
                     </div>
                     <div className="pace">
-                        <button onClick={()=>{this.tempoClick()}}>Tempo:{TEMPO[this.currTempo % TEMPO.length]}ms</button>
+                        <button onClick={()=>{this.tempoClick()}}>间隔:{TEMPO[this.currTempo % TEMPO.length]}ms</button>
                     </div>
                 </div>
             </div>

@@ -67,7 +67,17 @@
   left: 2px;
   top: 2px;
 }
-
+.selector {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid white;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 .dot-curr .dot-inner {
   width: 20px;
   height: 20px;
@@ -116,6 +126,18 @@
   font-weight: bold;
   font-size: 20px;
   cursor: pointer;
+  min-width: 80px;
+}
+.track-wrap button {
+  height: 40px;
+  border-radius: 4px;
+  background-color: #282c34;
+  color: #fff;
+  margin-right: 20px;
+  font-weight: bold;
+  font-size: 20px;
+  cursor: pointer;
+  min-width: 80px;
 }
 .submit {
   margin-left: 80px;
@@ -123,24 +145,32 @@
 
 .track-wrap {
   display: flex;
-  justify-content: space-around
+  justify-content: center;
+  align-items: center;
 }
 .track-row {
   display: flex;
   align-items: center;
-  margin-bottom: 10px
+}
+.track-dot-box {
+  width: 50px;
+  height: 25px;
+  position: relative;
 }
 .track-dot {
   border-radius: 50%;
-  width: 5px;
-  height: 5px;
-  margin-right: 20px
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 .track-dot.on {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
 }
 .track-dot.playing {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
 }
