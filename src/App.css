@@ -57,7 +57,8 @@
   width: 14px;
   height: 14px;
   background-color: #282c34;
-  /*background-color: black;*/
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 .dot-inner {
   border-radius: 50%;
@@ -72,11 +73,10 @@
   height: 80px;
   border-radius: 50%;
   background: transparent;
-  border: 1px solid white;
+  border: 1px solid;
   position: absolute;
-  left: 50%;
-  top: 50%;
   transform: translate(-50%, -50%);
+  z-index: 0;
 }
 .dot-curr .dot-inner {
   width: 20px;
