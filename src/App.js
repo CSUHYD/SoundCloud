@@ -28,19 +28,93 @@ export default class App extends React.Component {
             track1: track1Default,
             track2: track2Default,
             track3: track3Default,
-            track0Audio: {},
+            track0Audio: {}, // el, audioIndex
             track1Audio: {},
             track2Audio: {},
             track3Audio: {},
             interval: "",
             playing: false,
             pos: 0, // 0-15,
-            selectors: [0,0,2,3],
+            selectors: [0, 0, 2, 3],
         };
         this.pos = 0;
         this.currTempo = 4; // %11
+        this.selectorMove = {
+            0: false,
+            1: false,
+            2: false,
+            3: false,
+        };
+        this.dotsContainer = React.createRef();
     }
     componentDidMount() {}
+    startRecording() {
+        window.HZRecorder.get(rec => {
+            this.recorder = rec;
+            this.recorder.start();
+        });
+        this.setState({
+            recording: true,
+        });
+    }
+    stopRecording() {
+        if (!this.recorder) return;
+        const blob = this.recorder.getBlob();
+        this.setState({
+            audio: [
+                ...this.state.audio,
+                {
+                    src: window.URL.createObjectURL(this.recorder.getBlob()),
+                    blob: blob,
+                    coord: [Math.random(), Math.random()],
+                    color: this.getRandomColor(),
+                },
+            ],
+            recording: false,
+            editing: true,
+        });
+    }
+    uploadAndSort() {
+        const { audio } = this.state;
+        var fd = new FormData();
+        const len = audio.length;
+        for (let i = 0; i < len; i++) {
+            fd.append(`${i}`, audio[i].blob);
+        }
+        const arr = JSON.parse(JSON.stringify(this.state.audio));
+        const url = window.uploadAndSortUrl || "localhost:4000/sort";
+        axios.post(url, fd).then(res => {
+            // axios.post('http://47.99.141.253:4000/sort', fd).then((res) => { //todo robizlab.com
+            // axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
+            if (res && res.data) {
+                Object.keys(res.data).forEach(key => {
+                    if (arr[key]) {
+                        const color = `rgb(${res.data[key].coord[0] *
+                            255}, ${res.data[key].coord[1] * 255}, 125)`;
+                        arr[key].cluster = res.data[key].cluster;
+                        arr[key].coord = res.data[key].coord;
+                        arr[key].color = color;
+                    }
+                });
+                this.setState({
+                    audio: arr,
+                    editing: false,
+                });
+            }
+        });
+    }
+    loadTrack() {
+        for (let i = 0; i < 4; i++) {
+            if (this.state.audio[i]) {
+                this.setState({
+                    [`track${i}Audio`]: {
+                        el: document.getElementById(`audio${i}`),
+                        audioIndex: i,
+                    },
+                });
+            }
+        }
+    }
     playTracks() {
         this.pos = 0;
         const interval = setInterval(() => {
@@ -54,22 +128,27 @@ export default class App extends React.Component {
             }
             this.setState({
                 pos: this.pos,
-            })
+            });
         }, TEMPO[this.currTempo % TEMPO.length]);
         this.setState({
             interval,
-            playing: true
+            playing: true,
         });
     }
     stopPlaying() {
         clearInterval(this.state.interval);
         this.setState({
-            playing: false
+            playing: false,
         });
         this.loadAndPlay(0, false);
         this.loadAndPlay(1, false);
         this.loadAndPlay(2, false);
         this.loadAndPlay(3, false);
+    }
+    tempoClick() {
+        this.stopPlaying();
+        this.currTempo++;
+        this.playTracks();
     }
     loadAndPlay(i, on) {
         const a = this.state[`track${i}Audio`];
@@ -80,65 +159,47 @@ export default class App extends React.Component {
             }
         }
     }
-    startRecording() {
-        window.HZRecorder.get(rec => {
-            this.recorder = rec;
-            this.recorder.start();
-        });
-        this.setState({
-            recording: true
-        });
-    }
-    stopRecording() {
-        if (!this.recorder) return;
-        const blob = this.recorder.getBlob();
-        this.setState({
-            audio: [
-                ...this.state.audio,
-                {
-                    src: window.URL.createObjectURL(this.recorder.getBlob()),
-                    blob: blob,
-                    coord: [Math.random(), Math.random()],
-                    color: this.getRandomColor()
-                }
-            ],
-            recording: false,
-            editing: true
-        });
-    }
-    tempoClick() {
-        this.stopPlaying();
-        this.currTempo++;
-        this.playTracks();
-    }
-    uploadAndPlayAll() {
-        const { audio } = this.state;
-        var fd = new FormData();
-        const len = audio.length;
-        for (let i = 0; i < len; i++) {
-            fd.append(`${i}`, audio[i].blob);
-        }
-        const arr = JSON.parse(JSON.stringify(this.state.audio));
-        const url = window.uploadAndPlayUrl || "localhost:4000/sort";
-        axios.post(url, fd).then(res => {
-            //todo robizlab.com
-            // axios.post('http://47.99.141.253:4000/sort', fd).then((res) => { //todo robizlab.com
-            // axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
-            if (res && res.data) {
-                Object.keys(res.data).forEach(key => {
-                    if (arr[key]) {
-                        const color = `rgb(${res.data[key].coord[0] * 255}, ${res.data[key].coord[1] * 255}, 125)`;
-                        arr[key].cluster = res.data[key].cluster;
-                        arr[key].coord = res.data[key].coord;
-                        arr[key].color = color;
-                    }
-                });
-                this.setState({
-                    audio: arr,
-                    editing: false
-                });
+    selectorRelease(e, i) {
+        console.log("select release");
+        const rowAudio = this.state[`track${i}Audio`];
+        const t = e.target;
+        const pwidth = this.dotsContainer.current.offsetWidth;
+        const pHeight = this.dotsContainer.current.offsetHeight;
+        const cx = t.offsetLeft + parseFloat(t.getAttribute("data-x") || 0);
+        const cy = t.offsetTop + parseFloat(t.getAttribute("data-y") || 0);
+        let resIndex = -1;
+        let minDis = window.innerWidth + window.innerHeight;
+        this.state.audio.forEach((element, index) => {
+            const x = element.coord[0] * pwidth;
+            const y = element.coord[1] * pHeight;
+            const d = this.distance(cx, cy, x, y);
+            if (d < minDis) {
+                minDis = d;
+                resIndex = index;
             }
         });
+        console.log(cx, cy);
+        console.log(minDis);
+        if (resIndex > -1) {
+            this.setState({
+                [`track${i}Audio`]: Object.assign({}, rowAudio, {
+                    audioIndex: resIndex,
+                    el: document.getElementById(`audio${resIndex}`),
+                }),
+            });
+        } else {
+        }
+        t.style.zIndex = 0;
+        t.style.transform = "translate(-50%, -50%)";
+        t.setAttribute("data-x", 0);
+        t.setAttribute("data-y", 0);
+    }
+
+    // helpers
+    distance(x1, y1, x2, y2) {
+        const dx = Math.round(x1) - Math.round(x2);
+        const dy = Math.round(y1) - Math.round(y2);
+        return Math.round(Math.sqrt(dx * dx + dy * dy));
     }
     getRandomColor() {
         var letters = "0123456789ABCDEF";
@@ -148,26 +209,12 @@ export default class App extends React.Component {
         }
         return color;
     }
-    loadTrack() {
-        for(let i =0; i <4;i++){
-            if (this.state.audio[i]) {
-                this.setState({
-                    [`track${i}Audio`]: {
-                        el: document.getElementById(`audio${i}`),
-                        color: this.state.audio[i].color,
-                        coord: this.state.audio[i].coord,
-                        audioIndex: i,
-                    },
-                })
-            }
-        }    
-    }
     render() {
         const { audio, editing, recording } = this.state;
         return (
             <div className="App">
                 <div className="title">Sound Cloud</div>
-                <header className="App-header">
+                <header className="App-header" ref={this.dotsContainer}>
                     {audio.map((item, index) => {
                         // const color = `rgb(${item.coord[0] * 255}, ${item.coord[1] * 255}, 125)`;
                         return (
@@ -201,29 +248,59 @@ export default class App extends React.Component {
                             </div>
                         );
                     })}
-                    {/* {this.state.selectors.map((wchaud, wchsel) => {
-                        if (wchaud === index) {
-                            return <div className='selector' style={{borderColor: color}} onClick={()=>{
-                                console.log('select');
-                                
-                            }}/>
-                        }
-                    },)} */}
-                    {[0, 1, 2, 3].map((item, rowi) => {
-                        const rowAudio = this.state[`track${rowi}Audio`];
+                    {[0, 1, 2, 3].map(item => {
+                        const rowAudio = this.state[`track${item}Audio`];
                         if (rowAudio.audioIndex > -1) {
-                            // const color = `rgb(${rowAudio.coord[0] * 255}, ${rowAudio.coord[1] * 255}, 125)`;
+                            const aud = audio[rowAudio.audioIndex];
                             return (
                                 <div
                                     className="selector"
                                     style={{
-                                        borderColor: rowAudio.color,
-                                        left: rowAudio.coord[0] * 100 + "%",
-                                        top: rowAudio.coord[1] * 100 + "%",
+                                        borderColor: aud.color,
+                                        left: aud.coord[0] * 100 + "%",
+                                        top: aud.coord[1] * 100 + "%",
                                     }}
-                                    onClick={() => {
-                                        console.log("select");
+                                    onMouseDown={() => {
+                                        this.selectorMove[item] = true;
+                                        console.log("down");
                                     }}
+                                    onMouseUp={e => {
+                                        if (this.selectorMove[item]) {
+                                            console.log("up");
+                                            this.selectorMove[item] = false;
+                                            this.selectorRelease(e, item);
+                                        }
+                                    }}
+                                    onMouseLeave={e => {
+                                        if (this.selectorMove[item]) {
+                                            console.log("leave");
+                                            this.selectorMove[item] = false;
+                                            this.selectorRelease(e, item);
+                                        }
+                                    }}
+                                    onMouseMove={event => {
+                                        if (this.selectorMove[item]) {
+                                            let target = event.target;
+                                            let x =
+                                                (parseFloat(
+                                                    target.getAttribute(
+                                                        "data-x",
+                                                    ),
+                                                ) || 0) + event.movementX;
+                                            let y =
+                                                (parseFloat(
+                                                    target.getAttribute(
+                                                        "data-y",
+                                                    ),
+                                                ) || 0) + event.movementY;
+                                            target.style.webkitTransform = target.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+                                            target.style.zIndex = 1;
+                                            // update the position attributes
+                                            target.setAttribute("data-x", x);
+                                            target.setAttribute("data-y", y);
+                                        }
+                                    }}
+                                    id={`selector${item}`}
                                 />
                             );
                         }
@@ -256,7 +333,7 @@ export default class App extends React.Component {
                     <button
                         className="submit"
                         onClick={() => {
-                            this.uploadAndPlayAll();
+                            this.uploadAndSort();
                         }}
                     >
                         分类
@@ -271,61 +348,60 @@ export default class App extends React.Component {
                     </button>
                 </div>
                 <div className="track-wrap">
-                    <div className="play" onClick={() => {
+                    <div
+                        className="play"
+                        onClick={() => {
                             if (this.state.playing) {
                                 this.stopPlaying();
                             } else {
                                 this.playTracks();
                             }
-                        }}>
+                        }}
+                    >
                         <button>{this.state.playing ? "停止" : "播放"}</button>
                     </div>
                     <div className="track">
                         {[0, 1, 2, 3].map((item, rowi) => {
                             const row = this.state[`track${rowi}`];
                             const rowAudio = this.state[`track${rowi}Audio`];
+                            const color =
+                                (rowAudio.audioIndex > -1 &&
+                                    audio[rowAudio.audioIndex].color) ||
+                                "#fff";
                             return (
                                 <div className={`track${rowi} track-row`}>
-                                    {row.map(
-                                        (colitem, coli) => {
-                                            return (
+                                    {row.map((colitem, coli) => {
+                                        return (
+                                            <div
+                                                className="track-dot-box"
+                                                onClick={() => {
+                                                    const newrow = [...row];
+                                                    newrow[coli] =
+                                                        colitem === 0 ? 1 : 0; //toggle
+                                                    this.setState({
+                                                        [`track${rowi}`]: newrow,
+                                                    });
+                                                }}
+                                            >
                                                 <div
-                                                    className="track-dot-box"
-                                                    onClick={() => {
-                                                        const newrow = [...row];
-                                                        newrow[coli] =
-                                                            colitem === 0
-                                                                ? 1
-                                                                : 0; //toggle
-                                                        this.setState({
-                                                            [`track${rowi}`]: newrow,
-                                                        });
+                                                    className={`track-dot${
+                                                        colitem ? " on" : ""
+                                                    }${
+                                                        rowAudio.el &&
+                                                        this.state.pos ===
+                                                            coli &&
+                                                        colitem === 1 &&
+                                                        this.state.playing
+                                                            ? " playing"
+                                                            : ""
+                                                    }`}
+                                                    style={{
+                                                        backgroundColor: color,
                                                     }}
-                                                >
-                                                    <div
-                                                        className={`track-dot${
-                                                            colitem ? " on" : ""
-                                                        }${
-                                                            rowAudio.el &&
-                                                            this.state.pos ===
-                                                                coli &&
-                                                            colitem === 1 &&
-                                                            this.state.playing
-                                                                ? " playing"
-                                                                : ""
-                                                        }`}
-                                                        style={{
-                                                            backgroundColor:
-                                                                this.state[
-                                                                    `track${rowi}Audio`
-                                                                ].color ||
-                                                                "#fff",
-                                                        }}
-                                                    />
-                                                </div>
-                                            );
-                                        }
-                                    )}
+                                                />
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             );
                         })}
@@ -334,7 +410,13 @@ export default class App extends React.Component {
                         <button>随机</button>
                     </div>
                     <div className="pace">
-                        <button onClick={()=>{this.tempoClick()}}>间隔:{TEMPO[this.currTempo % TEMPO.length]}ms</button>
+                        <button
+                            onClick={() => {
+                                this.tempoClick();
+                            }}
+                        >
+                            间隔:{TEMPO[this.currTempo % TEMPO.length]}ms
+                        </button>
                     </div>
                 </div>
             </div>
