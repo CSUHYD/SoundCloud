@@ -201,6 +201,23 @@ export default class App extends React.Component {
         t.setAttribute("data-x", 0);
         t.setAttribute("data-y", 0);
     }
+    randomSelector() {
+        const {audio} = this.state;
+        const arr = (new Array(audio.length)).fill(0).map((item, i)=>{return i});
+        const rngarr = this.shuffleSort(arr);
+        for (let i = 0; i < 4; i++) {
+            if (this.state[`track${i}Audio`].el) {
+                this.setState({
+                    [`track${i}Audio`]: {
+                        el: document.getElementById(`audio${rngarr[i]}`),
+                        audioIndex: rngarr[i],
+                    },
+                });
+            }
+        }
+        // this.stopPlaying();
+        // this.playTracks();
+    }
 
     // helpers
     distance(x1, y1, x2, y2) {
@@ -215,6 +232,12 @@ export default class App extends React.Component {
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
+    }
+    shuffleSort(arr) {
+        arr.sort(()=> {
+          return Math.random() > .5 ? -1 : 1;
+        });
+        return arr;
     }
     render() {
         const { audio, editing, recording } = this.state;
@@ -269,18 +292,18 @@ export default class App extends React.Component {
                                     }}
                                     onMouseDown={() => {
                                         this.selectorMove[item] = true;
-                                        console.log("down");
+                                        // console.log("down");
                                     }}
                                     onMouseUp={e => {
                                         if (this.selectorMove[item]) {
-                                            console.log("up");
+                                            // console.log("up");
                                             this.selectorMove[item] = false;
                                             this.selectorRelease(e, item);
                                         }
                                     }}
                                     onMouseLeave={e => {
                                         if (this.selectorMove[item]) {
-                                            console.log("leave");
+                                            // console.log("leave");
                                             this.selectorMove[item] = false;
                                             this.selectorRelease(e, item);
                                         }
@@ -414,7 +437,13 @@ export default class App extends React.Component {
                         })}
                     </div>
                     <div className="random">
-                        <button>随机</button>
+                        <button
+                            onClick={() => {
+                                this.randomSelector();
+                            }}
+                        >
+                            随机
+                        </button>
                     </div>
                     <div className="pace">
                         <button
