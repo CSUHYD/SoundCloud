@@ -178,16 +178,23 @@ export default class App extends React.Component {
                 resIndex = index;
             }
         });
-        console.log(cx, cy);
-        console.log(minDis);
         if (resIndex > -1) {
-            this.setState({
-                [`track${i}Audio`]: Object.assign({}, rowAudio, {
-                    audioIndex: resIndex,
-                    el: document.getElementById(`audio${resIndex}`),
-                }),
-            });
-        } else {
+            // no selector overlapping
+            let overlap = false;
+            for (let i = 0; i < 4; i++) {
+                if (this.state[`track${i}Audio`].audioIndex === resIndex) {
+                    overlap = true;
+                    break;
+                }
+            }
+            if (!overlap) {
+                this.setState({
+                    [`track${i}Audio`]: Object.assign({}, rowAudio, {
+                        audioIndex: resIndex,
+                        el: document.getElementById(`audio${resIndex}`),
+                    }),
+                });
+            }
         }
         t.style.zIndex = 0;
         t.style.transform = "translate(-50%, -50%)";
