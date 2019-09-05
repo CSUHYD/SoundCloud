@@ -82,7 +82,7 @@ export default class App extends React.Component {
             fd.append(`${i}`, audio[i].blob);
         }
         const arr = JSON.parse(JSON.stringify(this.state.audio));
-        const url = window.uploadAndSortUrl || "localhost:4000/sort";
+        const url = window.uploadAndSortUrl || "https://127.0.0.1:4000/sort";
         axios.post(url, fd).then(res => {
             // axios.post('http://47.99.141.253:4000/sort', fd).then((res) => { //todo robizlab.com
             // axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
