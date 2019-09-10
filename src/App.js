@@ -54,8 +54,7 @@ export default class App extends React.Component {
             console.log("flask socket connected");
         });
         window.socket.on("sortResult", data => {
-            const arr = JSON.parse(JSON.stringify(this.state.audio));
-            console.log(data);
+            const arr = (this.state.audio);
             const obj = data;
             Object.keys(obj).forEach(key => {
                 if (arr[key]) {
@@ -100,7 +99,6 @@ export default class App extends React.Component {
     uploadAndSort() {
         const { audio } = this.state;
         const arrSend = audio.map(i => i.blob);
-        console.log('arrsend:', arrSend);
         window.socket.emit("sort", arrSend);
     }
     loadTrack() {
@@ -160,7 +158,6 @@ export default class App extends React.Component {
         }
     }
     selectorRelease(e, i) {
-        console.log("select release");
         const rowAudio = this.state[`track${i}Audio`];
         const t = e.target;
         const pwidth = this.dotsContainer.current.offsetWidth;
