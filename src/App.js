@@ -47,7 +47,30 @@ export default class App extends React.Component {
         };
         this.dotsContainer = React.createRef();
     }
-    componentDidMount() {}
+    componentDidMount() {
+        //flask socket connect
+        window.socket = window.io.connect("http://127.0.0.1:4000");
+        window.socket.on("connect", () => {
+            console.log("flask socket connected");
+        });
+        window.socket.on("sortResult", data => {
+            const arr = JSON.parse(JSON.stringify(this.state.audio));
+            console.log(data);
+            const obj = data;
+            Object.keys(obj).forEach(key => {
+                if (arr[key]) {
+                    const color = `rgb(${Math.round(obj[key].coord[0] * 255)}, ${Math.round(obj[key].coord[1] * 255)}, 125)`;
+                    arr[key].cluster = obj[key].cluster;
+                    arr[key].coord = obj[key].coord;
+                    arr[key].color = color;
+                }
+            });
+            this.setState({
+                audio: arr,
+                editing: false,
+            });
+        });
+    }
     startRecording() {
         window.HZRecorder.get(rec => {
             this.recorder = rec;
@@ -76,32 +99,9 @@ export default class App extends React.Component {
     }
     uploadAndSort() {
         const { audio } = this.state;
-        var fd = new FormData();
-        const len = audio.length;
-        for (let i = 0; i < len; i++) {
-            fd.append(`${i}`, audio[i].blob);
-        }
-        const arr = JSON.parse(JSON.stringify(this.state.audio));
-        const url = window.uploadAndSortUrl || "https://127.0.0.1:4000/sort";
-        axios.post(url, fd).then(res => {
-            // axios.post('http://47.99.141.253:4000/sort', fd).then((res) => { //todo robizlab.com
-            // axios.post('https://robizlab.com/soundcloud/sort', fd).then((res) => { //todo robizlab.com
-            if (res && res.data) {
-                Object.keys(res.data).forEach(key => {
-                    if (arr[key]) {
-                        const color = `rgb(${res.data[key].coord[0] *
-                            255}, ${res.data[key].coord[1] * 255}, 125)`;
-                        arr[key].cluster = res.data[key].cluster;
-                        arr[key].coord = res.data[key].coord;
-                        arr[key].color = color;
-                    }
-                });
-                this.setState({
-                    audio: arr,
-                    editing: false,
-                });
-            }
-        });
+        const arrSend = audio.map(i => i.blob);
+        console.log('arrsend:', arrSend);
+        window.socket.emit("sort", arrSend);
     }
     loadTrack() {
         for (let i = 0; i < 4; i++) {
@@ -202,8 +202,10 @@ export default class App extends React.Component {
         t.setAttribute("data-y", 0);
     }
     randomSelector() {
-        const {audio} = this.state;
-        const arr = (new Array(audio.length)).fill(0).map((item, i)=>{return i});
+        const { audio } = this.state;
+        const arr = new Array(audio.length).fill(0).map((item, i) => {
+            return i;
+        });
         const rngarr = this.shuffleSort(arr);
         for (let i = 0; i < 4; i++) {
             if (this.state[`track${i}Audio`].el) {
@@ -234,8 +236,8 @@ export default class App extends React.Component {
         return color;
     }
     shuffleSort(arr) {
-        arr.sort(()=> {
-          return Math.random() > .5 ? -1 : 1;
+        arr.sort(() => {
+            return Math.random() > 0.5 ? -1 : 1;
         });
         return arr;
     }

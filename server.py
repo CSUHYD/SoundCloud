@@ -2,29 +2,21 @@ from flask import Flask, request, Response, make_response
 import json
 from io import StringIO
 from werkzeug.datastructures import ImmutableMultiDict
+from flask_cors import CORS
+from flask_socketio import SocketIO
 
-app = Flask(__name__)
+# socket
+flask_app = Flask(__name__)
+flask_app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(flask_app)
+CORS(flask_app)
 
-@app.route('/')
-def root():
-    return 'Welcome Sound Cloud Server!'
-
-
-@app.route('/api/speech',methods=['GET', 'POST'])
-def projects():
-    if request.method=='POST':
-        print('POST')
-        data = request.files['0']
-        #data = dict(request.form)
-        print(data)
-        print(request.files.length)
-
-        return 'ok'
-
-    else:
-        print('GET')
-        return 'GET Method'
-
+@socketio.on('sort')
+def sort(data):
+    print(data)
+    print(str(data))
+    return 'sort result'
 
 if __name__ == '__main__':
-    app.run(ssl_context='adhoc',debug=True, host='127.0.0.1', port=4000)
+    # app.run(ssl_context=context, debug=True, host='127.0.0.1', port=4000)
+    socketio.run(flask_app, debug=True, host='127.0.0.1', port=4000)
