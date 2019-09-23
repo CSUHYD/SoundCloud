@@ -9,6 +9,7 @@ const track1Default = [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0];
 const track2Default = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
 const track3Default = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
 const TEMPO = [100, 150, 200, 250, 300, 400, 500, 600, 800, 1000];
+const COLORS = ['red', 'yellow', 'green', 'pink'];
 export default class App extends React.Component {
     constructor(props) {
         super(props);
@@ -58,10 +59,10 @@ export default class App extends React.Component {
             const obj = data;
             Object.keys(obj).forEach(key => {
                 if (arr[key]) {
-                    const color = `rgb(${Math.round(obj[key].coord[0] * 255)}, ${Math.round(obj[key].coord[1] * 255)}, 125)`;
+                    // const color = `rgb(${Math.round(obj[key].coord[0] * 255)}, ${Math.round(obj[key].coord[1] * 255)}, 125)`;
                     arr[key].cluster = obj[key].cluster;
                     arr[key].coord = obj[key].coord;
-                    arr[key].color = color;
+                    arr[key].color = COLORS[arr[key].cluster];
                 }
             });
             this.setState({
