@@ -9,7 +9,9 @@ const track1Default = [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0];
 const track2Default = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
 const track3Default = [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0];
 const TEMPO = [100, 150, 200, 250, 300, 400, 500, 600, 800, 1000];
-const COLORS = ['red', 'yellow', 'green', 'pink'];
+const COLORS = ["red", "yellow", "green", "pink"];
+const PRE_REC = 100; //
+const REC_DURATION = 1000;
 export default class App extends React.Component {
     constructor(props) {
         super(props);
@@ -55,7 +57,7 @@ export default class App extends React.Component {
             console.log("flask socket connected");
         });
         window.socket.on("sortResult", data => {
-            const arr = (this.state.audio);
+            const arr = this.state.audio;
             const obj = data;
             Object.keys(obj).forEach(key => {
                 if (arr[key]) {
@@ -72,13 +74,25 @@ export default class App extends React.Component {
         });
     }
     startRecording() {
+        if(this.state.recording) return;
         window.HZRecorder.get(rec => {
             this.recorder = rec;
-            this.recorder.start();
+            setTimeout(() => {
+                this.recorder.start();
+
+                this.setState({
+                    recording: true,
+                });
+            }, PRE_REC);
+            setTimeout(() => {
+                this.recEnd();
+            }, PRE_REC + REC_DURATION);
         });
-        this.setState({
-            recording: true,
-        });
+    }
+    recEnd() {
+        this.stopRecording();
+        this.uploadAndSort();
+        this.loadTrack();
     }
     stopRecording() {
         if (!this.recorder) return;
@@ -196,6 +210,9 @@ export default class App extends React.Component {
         }
         t.style.zIndex = 0;
         t.style.transform = "translate(-50%, -50%)";
+        setTimeout(() => {
+            t.style.transition = "left, top 1s";
+        }, 0);
         t.setAttribute("data-x", 0);
         t.setAttribute("data-y", 0);
     }
@@ -290,8 +307,9 @@ export default class App extends React.Component {
                                         left: aud.coord[0] * 100 + "%",
                                         top: aud.coord[1] * 100 + "%",
                                     }}
-                                    onMouseDown={() => {
+                                    onMouseDown={(e) => {
                                         this.selectorMove[item] = true;
+                                        e.target.style.transition = 'none';
                                         // console.log("down");
                                     }}
                                     onMouseUp={e => {
@@ -344,40 +362,15 @@ export default class App extends React.Component {
                         type="success"
                         size="small"
                     >
-                        <span
-                            className={`recording-dot${
-                                recording ? " blink" : ""
-                            }`}
-                        />
-                        开始录音
+                        录音
+                        <div className="progress-wrap">
+                            <span
+                                className={`recording-dot${
+                                    recording ? " blink" : ""
+                                }`}
+                            />
+                        </div>
                     </button>
-                    <button
-                        onClick={() => {
-                            this.stopRecording();
-                        }}
-                        type="danger"
-                        size="small"
-                    >
-                        结束录音
-                    </button>
-                    <button
-                        className="submit"
-                        onClick={() => {
-                            this.uploadAndSort();
-                        }}
-                    >
-                        分类
-                    </button>
-                    <button
-                        className="submit"
-                        onClick={() => {
-                            this.loadTrack();
-                        }}
-                    >
-                        载入音轨
-                    </button>
-                </div>
-                <div className="track-wrap">
                     <div
                         className="play"
                         onClick={() => {
@@ -390,6 +383,51 @@ export default class App extends React.Component {
                     >
                         <button>{this.state.playing ? "停止" : "播放"}</button>
                     </div>
+                    <div className="pace">
+                        <button
+                            onClick={() => {
+                                this.tempoClick();
+                            }}
+                        >
+                            节拍:{TEMPO[this.currTempo % TEMPO.length]/1000}秒
+                        </button>
+                    </div>
+                    <div className="random">
+                        <button
+                            onClick={() => {
+                                this.randomSelector();
+                            }}
+                        >
+                            随机
+                        </button>
+                    </div>
+                    {/* <button
+                        onClick={() => {
+                            this.stopRecording();
+                        }}
+                        type="danger"
+                        size="small"
+                    >
+                        结束录音
+                    </button> */}
+                    {/* <button
+                        className="submit"
+                        onClick={() => {
+                            this.uploadAndSort();
+                        }}
+                    >
+                        分类
+                    </button> */}
+                    {/* <button
+                        className="submit"
+                        onClick={() => {
+                            this.loadTrack();
+                        }}
+                    >
+                        载入音轨
+                    </button> */}
+                </div>
+                <div className="track-wrap">
                     <div className="track">
                         {[0, 1, 2, 3].map((item, rowi) => {
                             const row = this.state[`track${rowi}`];
@@ -435,24 +473,6 @@ export default class App extends React.Component {
                                 </div>
                             );
                         })}
-                    </div>
-                    <div className="random">
-                        <button
-                            onClick={() => {
-                                this.randomSelector();
-                            }}
-                        >
-                            随机
-                        </button>
-                    </div>
-                    <div className="pace">
-                        <button
-                            onClick={() => {
-                                this.tempoClick();
-                            }}
-                        >
-                            间隔:{TEMPO[this.currTempo % TEMPO.length]}ms
-                        </button>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,10 @@
+body {
+  overflow: hidden;
+}
 .App {
   text-align: center;
   background-color: #282c34;
+  overflow: hidden;
 }
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
@@ -16,9 +20,9 @@
   }
 }
 .blink {
-  animation: blinking infinite 1.5s linear;
+  animation: progress 1s linear;
 }
-@keyframes blinking {
+/* @keyframes blinking {
   0% {
     opacity: 1;
   }
@@ -27,6 +31,15 @@
   }
   0% {
     opacity: 1;
+  }
+} */
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
   }
 }
 
@@ -42,14 +55,14 @@
 .App-header {
   position: relative;
   background-color: #282c34;
-  height: 65vh;
+  height: calc(65vh - 80px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-  margin: 0 40px 0 20px;
+  margin: 40px 140px 40px 120px;
 }
 .dot {
   border-radius: 50%;
@@ -59,6 +72,7 @@
   background-color: #282c34;
   transform: translate(-50%, -50%);
   z-index: 1;
+  transition: left,top 1s;
 }
 .dot-inner {
   border-radius: 50%;
@@ -77,6 +91,7 @@
   position: absolute;
   transform: translate(-50%, -50%);
   z-index: 0;
+  transition: left,top 1s;
   cursor: pointer;
 }
 .dot-curr .dot-inner {
@@ -98,13 +113,20 @@
   border: 2px solid white;
   z-index: 10;
 }
+.progress-wrap {
+  position: relative;
+  width: 70px;
+  height: 10px;
+  background-color: #fff;
+  margin: auto;
+}
 .recording-dot {
-  width: 15px;
-  height: 15px;
-  background-color: red;
+  position: absolute;
+  left: 0;
+  width: 0px;
+  height: 10px;
+  background-color:greenyellow;
   display: inline-block;
-  border-radius: 50%;
-  margin-right: 10px;
 }
 .App-link {
   color: #61dafb;
