@@ -38,7 +38,6 @@ export default class App extends React.Component {
             interval: "",
             playing: false,
             pos: 0, // 0-15,
-            selectors: [0, 0, 2, 3],
         };
         this.pos = 0;
         this.currTempo = 4; // %11
@@ -272,12 +271,13 @@ export default class App extends React.Component {
                                         : ""
                                 }`}
                                 style={{
-                                    // if cluster exist, pick color[cluster]
                                     left: item.coord[0] * 100 + "%",
                                     top: item.coord[1] * 100 + "%",
                                 }}
+                                onMouseDown={e => {
+                                    e.preventDefault();
+                                }}
                             >
-                                <audio src={item.src} id={"audio" + index} />
                                 <div
                                     className="dot-inner"
                                     onMouseOver={() => {
@@ -287,11 +287,18 @@ export default class App extends React.Component {
                                         el.load();
                                         el.play();
                                     }}
+                                    onMouseDown={e => {
+                                        e.preventDefault();
+                                    }}
                                     style={{
-                                        // if cluster exist, pick color[cluster]
                                         backgroundColor: item.color,
                                     }}
-                                />
+                                >
+                                    <audio
+                                        src={item.src}
+                                        id={"audio" + index}
+                                    />
+                                </div>
                             </div>
                         );
                     })}
@@ -307,27 +314,28 @@ export default class App extends React.Component {
                                         left: aud.coord[0] * 100 + "%",
                                         top: aud.coord[1] * 100 + "%",
                                     }}
-                                    onMouseDown={(e) => {
+                                    onMouseDown={e => {
                                         this.selectorMove[item] = true;
-                                        e.target.style.transition = 'none';
-                                        // console.log("down");
+                                        e.target.style.transition = "none";
+                                        console.log("1");
                                     }}
                                     onMouseUp={e => {
                                         if (this.selectorMove[item]) {
-                                            // console.log("up");
+                                            console.log("4");
                                             this.selectorMove[item] = false;
                                             this.selectorRelease(e, item);
                                         }
                                     }}
                                     onMouseLeave={e => {
                                         if (this.selectorMove[item]) {
-                                            // console.log("leave");
+                                            console.log("3");
                                             this.selectorMove[item] = false;
                                             this.selectorRelease(e, item);
                                         }
                                     }}
                                     onMouseMove={event => {
                                         if (this.selectorMove[item]) {
+                                            console.log("2");
                                             let target = event.target;
                                             let x =
                                                 (parseFloat(
@@ -389,7 +397,7 @@ export default class App extends React.Component {
                                 this.tempoClick();
                             }}
                         >
-                            节拍:{TEMPO[this.currTempo % TEMPO.length]/1000}秒
+                            节拍:{TEMPO[this.currTempo % TEMPO.length] / 1000}秒
                         </button>
                     </div>
                     <div className="random">
