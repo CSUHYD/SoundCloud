@@ -317,25 +317,25 @@ export default class App extends React.Component {
                                     onMouseDown={e => {
                                         this.selectorMove[item] = true;
                                         e.target.style.transition = "none";
-                                        console.log("1");
+                                        // console.log("1");
                                     }}
                                     onMouseUp={e => {
                                         if (this.selectorMove[item]) {
-                                            console.log("4");
+                                            // console.log("4");
                                             this.selectorMove[item] = false;
                                             this.selectorRelease(e, item);
                                         }
                                     }}
                                     onMouseLeave={e => {
                                         if (this.selectorMove[item]) {
-                                            console.log("3");
+                                            // console.log("3");
                                             this.selectorMove[item] = false;
                                             this.selectorRelease(e, item);
                                         }
                                     }}
                                     onMouseMove={event => {
                                         if (this.selectorMove[item]) {
-                                            console.log("2");
+                                            // console.log("2");
                                             let target = event.target;
                                             let x =
                                                 (parseFloat(
