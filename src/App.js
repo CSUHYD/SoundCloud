@@ -21,7 +21,7 @@ export default class App extends React.Component {
                 //     src: '',
                 //     blob: {},
                 //     coord: [0.1, 0.2],
-                //     color: '', // initial random color. 刚加入是颜色随机 跟位置无关。分类后 跟位置有关
+                //     color: '', // initial random color. 刚加入是颜色随机 跟位置无关。分类后 每个类一个颜色
                 //     cluster: 1,
                 // },
             ], //
