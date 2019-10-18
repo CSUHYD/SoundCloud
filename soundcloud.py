@@ -188,4 +188,4 @@ def soundcloud(directory, n_clusters=4, distance=0.5, do_plot=False):
 
 
 if __name__ == '__main__':
-    soundcloud(directory='./data', do_plot=True)
+    soundcloud(directory='./dataset', do_plot=True)
