@@ -1,14 +1,12 @@
-#! /usr/bin/env python
-
-from flask import Flask, request, Response, make_response
+from flask import Flask
 import json
-from io import StringIO
-from werkzeug.datastructures import ImmutableMultiDict
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, send, emit
+import eventlet
 import os
 import shutil
 from soundcloud import soundcloud
+
 # socket
 flask_app = Flask(__name__)
 flask_app.config['SECRET_KEY'] = 'secret!'
@@ -43,6 +41,7 @@ def sort(data):
     with open("result.json", 'r') as f:
         json_result = json.load(f)
     print(json_result)
+    emit('sortResult', json_result)
 
     return json_result
 

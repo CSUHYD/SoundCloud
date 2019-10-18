@@ -8,7 +8,6 @@
 
 import os
 import json
-import threading
 import sklearn
 import librosa
 import numpy as np
@@ -16,16 +15,15 @@ import matplotlib.pyplot as plt
 from clustering import get_scaled_umap_embeddings, get_scaled_pca_embeddings
 
 np.random.seed(8)
-threading.current_thread().setName('MainThread')
 
-def get_file_paths(directory, do_sort=True):
+
+def get_file_paths(directory):
     files_paths = []
     files = os.listdir(directory)
     files = [i for i in files if i[-4:] == '.wav']
-    if do_sort:
-        files.sort()
-        files.sort(key=lambda x: int(x[:-4]))
-    print("[info] All WAV file paths sorted by file names: \n", files)
+    files.sort()
+    files.sort(key=lambda x: int(x[:-4]))
+    print("All WAV file paths sorted by file names: \n", files)
 
     for file in files:
         file_path = os.path.join(directory, file)
@@ -34,25 +32,24 @@ def get_file_paths(directory, do_sort=True):
     return files_paths
 
 
-def get_file_names(directory, do_sort=True):
+def get_file_names(directory):
     file_names = []
     names = os.listdir(directory)
     names = [i for i in names if i[-4:] == '.wav']
-    if do_sort:
-        names.sort()
-        names.sort(key=lambda x: int(x[:-4]))
+    names.sort()
+    names.sort(key=lambda x: int(x[:-4]))
 
     for name in names:
         file_names.append(name[:-4])
-    print("[info] All WAV files name sorted by file names: \n", file_names)
+    print("All WAV files name sorted by file names: \n", file_names)
 
     return file_names
+
 
 def get_mfcc_features(files_paths, sample_rate=44100, mfcc_size=13):
     # 提取MFCC特征，高保真压缩音频至numpy数组
     dataset = []
-    print("[info] Extracting MFCC features from raw audio files...")
-    print("[info] Number of sound files: ", len(files_paths))
+    print("Extracting MFCC features from raw audio files...")
 
     for file in files_paths:
         data, _ = librosa.load(file)  # mp3 file -> PCM audio data
@@ -82,7 +79,7 @@ def get_mfcc_features(files_paths, sample_rate=44100, mfcc_size=13):
 
 # K-Means
 def kmeans(features, n_clusters):
-    kmeans = sklearn.cluster.KMeans(n_clusters=n_clusters, max_iter=10000)
+    kmeans = sklearn.cluster.KMeans(n_clusters=n_clusters, max_iter=1000000)
     kmeans.fit(features)
     kmeans_result = kmeans.predict(features)
 
@@ -96,7 +93,7 @@ def json_result(filenames, features, cluster_result):
         file_name = filenames[i]
         coordinate = features[i]
         cluster = cluster_result[i]
-        result.update({file_name: {"cluster":cluster , "coord": coordinate}})
+        result.update({file_name: {"cluster": cluster, "coord": coordinate}})
 
     return result
 
@@ -105,6 +102,7 @@ def json_result(filenames, features, cluster_result):
 def store(data, path):
     with open(path, 'w') as f:
         f.write(json.dumps(data, cls=MyEncoder))
+
 
 # Convert numpy type to python
 class MyEncoder(json.JSONEncoder):
@@ -129,42 +127,36 @@ def soundcloud(directory, n_clusters=4, distance=0.5, do_plot=False):
     '''
 
     # ---------- Get audio file paths -----------
-
-    file_paths = get_file_paths(directory, do_sort=False)
+    file_paths = get_file_paths(directory)
 
     # ---------- Get audio file names -----------
-    file_names = get_file_names(directory, do_sort=False)
-
+    file_names = get_file_names(directory)
 
     # ---------- Extract UMAP-MFCC features from raw audio files -----------
-
     mfcc_features = get_mfcc_features(file_paths)
-    print('[info] shape of MFCC features: ', mfcc_features.shape)
+    print('shape of MFCC features: \n', mfcc_features.shape)
+    # if len(file_names) < 10:
+    #     print('PCA running...')
+    #     reduction_features = get_scaled_pca_embeddings(mfcc_features)
+    #     print('PCA Dimensionality Reduction Done!')
+    # else:
+    #     print('UMAP running...')
+    #     reduction_features = get_scaled_umap_embeddings(mfcc_features,
+    #                                         neighbour=int(len(file_paths) / 2),
+    #                                         distance=distance)
+    #     print('UMAP Dimensionality Reduction Done!')
 
-
-    if len(file_names) < 10:
-        print('[info] PCA running...')
-        reduction_features = get_scaled_pca_embeddings(mfcc_features)
-        print('[info] Dimensionality Reduction Done!')
-    else:
-        print('[info] UMAP running...')
-        reduction_features = get_scaled_umap_embeddings(mfcc_features,
-                                            neighbour=int(len(file_paths) / 2),
-                                            distance=distance)
-        print('[info] Dimensionality Reduction Done!')
-
+    print('PCA running...')
+    reduction_features = get_scaled_pca_embeddings(mfcc_features)
+    print('PCA Dimensionality Reduction Done!')
 
     # ---------- K-means clustering  -----------
-
     if len(file_paths) < 4:
-        n_clusters = len(file_paths) - 1
-
-    print('[info] K-Means running...')
+        n_clusters = 1
     cluster_result = kmeans(reduction_features, n_clusters=n_clusters)
-
+    print('聚类个数为: ', n_clusters)
 
     # ---------- Plot K-means result  -----------
-
     if do_plot:
         plt.scatter(reduction_features[:, 0],
                     reduction_features[:, 1],
@@ -172,9 +164,7 @@ def soundcloud(directory, n_clusters=4, distance=0.5, do_plot=False):
         plt.show()
 
     # ---------- Print K-means result  -----------
-
     result_dict = dict()
-
     for i in range(len(cluster_result)):
         file_name = file_paths[i]
         cluster = cluster_result[i]
@@ -187,9 +177,7 @@ def soundcloud(directory, n_clusters=4, distance=0.5, do_plot=False):
             if c == value:
                 print(key, value)
 
-
     # ---------- Generate json files -----------
-
     # dict
     result = json_result(file_names, reduction_features, cluster_result)
     print('result: ', result)
@@ -198,5 +186,6 @@ def soundcloud(directory, n_clusters=4, distance=0.5, do_plot=False):
 
     return result
 
+
 if __name__ == '__main__':
-    soundcloud(directory = './client_data', do_plot=True)
+    soundcloud(directory='./data', do_plot=True)
