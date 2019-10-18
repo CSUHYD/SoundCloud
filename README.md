@@ -1,4 +1,6 @@
 # SoundCloud
+SoundCloud is an application which you can record sounds, clustering sounds, and create track.
+
 ### 1. Requirements
 See the *requirements.txt* file or simply run:
 >  `pip install -r requirements.txt`
