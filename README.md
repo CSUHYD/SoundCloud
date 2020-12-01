@@ -1,5 +1,5 @@
 # SoundCloud
-SoundCloud is an application which you can record sounds, clustering sounds, and create track.
+SoundCloud is an application for recording sounds, clustering sounds & creating track.
 
 ### 1. Requirements
 See the *requirements.txt* file or simply run:
