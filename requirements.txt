@@ -24,7 +24,7 @@ MarkupSafe==1.1.1
 mccabe==0.6.1
 monotonic==1.5
 numpy==1.16.3
-opencv-python==4.1.0.25
+opencv-python==4.2.0.32
 Pillow==6.0.0
 protobuf==3.7.1
 pycparser==2.19
